@@ -1,0 +1,21 @@
+/* Payload sizes the admin shell with 100vh, which on mobile browsers is the height with the toolbars hidden,
+   so the bottom of the nav (log out) and full-height panels sit under the browser chrome. dvh tracks the visible
+   viewport. Payload's styles live in @layer payload-default, so these unlayered rules win; browsers without dvh
+   drop them and keep 100vh. */
+.nav,
+.drawer {
+  height: 100dvh;
+}
+
+.template-default,
+.verify {
+  min-height: 100dvh;
+}
+
+.document-fields__sidebar-wrap {
+  height: var(--sidebar-wrap-height, calc(100dvh - var(--doc-controls-height)));
+}
+
+.live-preview-window {
+  height: calc(100dvh - var(--doc-controls-height));
+}
