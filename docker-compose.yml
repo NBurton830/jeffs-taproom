@@ -1,0 +1,62 @@
+# ARCH-007: app + Postgres + Caddy (automatic HTTPS). Copy .env.example to .env first.
+services:
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URI: postgres://jeffs:${POSTGRES_PASSWORD}@db:5432/jeffs
+      MEDIA_DIR: /app/media
+    volumes:
+      - media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jeffs
+      POSTGRES_DB: jeffs
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U jeffs']
+      interval: 5s
+      retries: 10
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backups:/backups
+    # Nightly pg_dump with 14-day retention
+    entrypoint: >
+      sh -c 'while true; do
+        pg_dump -h db -U jeffs jeffs | gzip > /backups/jeffs-$$(date +%F).sql.gz;
+        find /backups -name "*.sql.gz" -mtime +14 -delete;
+        sleep 86400; done'
+    depends_on: [db]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [app]
+
+volumes:
+  pgdata:
+  media:
+  caddy_data:
