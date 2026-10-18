@@ -29,7 +29,9 @@ import { migrations } from './migrations'
 import { siteUrl } from './lib/seo'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
-const databaseUri = process.env.DATABASE_URI || 'file:./data/dev.db'
+// DATABASE_URI wins when it holds a real URL; otherwise fall back to DATABASE_URL, which Vercel's Neon integration sets
+const isDbUrl = (u?: string): u is string => !!u && /^(postgres(ql)?|file|libsql):/.test(u)
+const databaseUri = [process.env.DATABASE_URI, process.env.DATABASE_URL].find(isDbUrl) || 'file:./data/dev.db'
 const isE2E = process.env.E2E === '1'
 
 // ARCH-001: SQLite for dev/test, PostgreSQL in production.

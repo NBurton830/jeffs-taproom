@@ -23,7 +23,6 @@ Project → **Settings → Environment Variables** (all environments):
 
 | Name | Value |
 |---|---|
-| `DATABASE_URI` | Copy the value of `DATABASE_URL` that Neon added (the pooled connection string) |
 | `PAYLOAD_SECRET` | Output of `openssl rand -hex 32` |
 | `NEXT_PUBLIC_SITE_URL` | `https://<your-project>.vercel.app` (your production URL, no trailing slash) |
 | `SEED_STAFF_EMAIL` | Your email (becomes the first admin login) |
