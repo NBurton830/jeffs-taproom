@@ -2,6 +2,15 @@
    so the bottom of the nav (log out) and full-height panels sit under the browser chrome. dvh tracks the visible
    viewport. Payload's styles live in @layer payload-default, so these unlayered rules win; browsers without dvh
    drop them and keep 100vh. */
+
+/* The admin scrolls inside <body> (html, body, #app { height: 100% }). On iOS 100% is the large viewport, so the
+   end of that scroller sits under the bottom toolbar and can never be scrolled into view. */
+html,
+body,
+#app {
+  height: 100dvh;
+}
+
 .nav,
 .drawer {
   height: 100dvh;
